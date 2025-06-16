@@ -82,11 +82,12 @@ export default function SimulationDashboard() {
   const [selectedAdapter, setSelectedAdapter] = useState("pyqtree");
 
   const runSimulation = async () => {
-    const res = await fetch("/simulate", {
+    const res = await fetch(`${__API_URL__}/simulate`, {
       method: "POST",
       headers: { "Content-Type": "application/json" },
       body: JSON.stringify({ input: inputText })
     });
+
     const json = await res.json();
     const [width, height] = inputText.split("\n")[0].trim().split(" ").map(Number);
     setGridSize({ width, height });
