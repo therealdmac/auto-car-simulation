@@ -2,6 +2,12 @@
 
 A fullstack web app that simulates multiple self-driving cars on a 2D grid. It detects collisions, visualizes car movement step-by-step, benchmarks different spatial indexing strategies (e.g., BruteForce, QuadTree, PyQTree), and provides an elegant React + Tailwind dashboard.
 
+|          | PROD                                                    | DEV                        |
+|----------|---------------------------------------------------------|----------------------------|
+| Frontend | https://auto-car-frontend-production.up.railway.app/    | http://localhost:5173      |
+| Backend  | https://auto-car-backend-production.up.railway.app/     | http://localhost:8000      |
+| Swagger  | https://auto-car-backend-production.up.railway.app/docs | http://localhost:8000/docs |
+
 ---
 
 ## 🧩 Features
