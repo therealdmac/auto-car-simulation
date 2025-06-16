@@ -2,7 +2,6 @@ services:
   - type: web
     name: auto-car-backend
     env: python
-    plan: free
     buildCommand: pip install -r simulation_engine/requirements.txt
     startCommand: uvicorn simulation_engine.main:app --host 0.0.0.0 --port 10000
     envVars:
@@ -12,6 +11,5 @@ services:
   - type: web
     name: auto-car-frontend
     env: static
-    plan: free
     buildCommand: cd frontend && npm install && npm run build
     staticPublishPath: frontend/dist
