@@ -17,11 +17,15 @@ export default defineConfig(({ mode }) => {
         },
         server: {
             proxy: {
-                '/simulate': env.VITE_API_URL
+                '/simulate': {
+                    target: env.VITE_API_URL,
+                    changeOrigin: true,
+                    rewrite: (path) => path.replace(/^\/simulate/, '/simulate'),
+                },
             },
         },
         define: {
-            __API_URL__: JSON.stringify(env.VITE_API_URL)
+            __API_URL__: JSON.stringify(env.VITE_API_URL),
         }
     }
 })
