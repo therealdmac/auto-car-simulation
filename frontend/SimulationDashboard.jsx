@@ -1,6 +1,7 @@
 import React, { useState, useEffect } from "react";
 import { BarChart, Bar, XAxis, YAxis, Tooltip, ResponsiveContainer } from "recharts";
 import { MapPin, Play, Pause } from "lucide-react";
+import { ArrowUp, ArrowDown, ArrowLeft, ArrowRight } from "lucide-react";
 
 const Card = ({ children, className = "" }) => (
   <div className={`bg-white rounded-xl shadow-soft p-6 text-gray-700 ${className}`}>{children}</div>
@@ -25,6 +26,17 @@ function AdapterSelector({ adapters, selected, onChange }) {
   );
 }
 
+function getDirectionIcon(direction) {
+  const iconProps = { className: "w-full h-full" };
+  switch (direction) {
+    case "N": return <ArrowUp {...iconProps} />;
+    case "S": return <ArrowDown {...iconProps} />;
+    case "E": return <ArrowRight {...iconProps} />;
+    case "W": return <ArrowLeft {...iconProps} />;
+    default: return null;
+  }
+}
+
 function BenchmarkChart({ results, fastest }) {
   return (
     <Card className="mb-6">
@@ -43,30 +55,55 @@ function BenchmarkChart({ results, fastest }) {
 }
 
 function CollisionGrid({ gridSize, cars, collisions, step }) {
+  const carColors = Object.keys(cars).reduce((acc, id, i) => {
+    const colors = ["bg-blue-500", "bg-green-500", "bg-purple-500", "bg-orange-500", "bg-pink-500", "bg-yellow-500"];
+    acc[id] = colors[i % colors.length];
+    return acc;
+  }, {});
+
   return (
     <Card>
       <h2 className="text-xl font-bold mb-4">Collision Map & Playback</h2>
-      <div className="grid border rounded overflow-hidden" style={{ gridTemplateColumns: `repeat(${gridSize.width}, 1fr)` }}>
-        {[...Array(gridSize.height)].map((_, row) => (
-          [...Array(gridSize.width)].map((_, col) => {
-            const carsHere = Object.entries(cars).filter(
-              ([id, car]) => car.history[step]?.[0] === col && car.history[step]?.[1] === gridSize.height - 1 - row
-            );
-            const collisionsHere = collisions.filter(
-              c => c[2] === col && c[3] === gridSize.height - 1 - row && c[4] === step + 1
-            );
-            const bgColor = collisionsHere.length ? "bg-red-500" : carsHere.length ? "bg-gradient-to-br from-cyan-400 to-blue-600 text-white" : "bg-gray-100";
+      <div className="relative w-full aspect-square mx-auto border rounded overflow-hidden shadow">
+        <div
+          className="grid w-full h-full"
+          style={{ gridTemplateColumns: `repeat(${gridSize.width}, minmax(0, 1fr))` }}
+        >
+          {[...Array(gridSize.height)].map((_, row) => (
+            [...Array(gridSize.width)].map((_, col) => {
+              const carsHere = Object.entries(cars).filter(
+                ([id, car]) => car.history[step]?.[0] === col && car.history[step]?.[1] === gridSize.height - 1 - row
+              );
+              const collisionsHere = collisions.filter(
+                c => c[2] === col && c[3] === gridSize.height - 1 - row && c[4] === step + 1
+              );
+              const bgColor = collisionsHere.length
+                ? "bg-red-500"
+                : carsHere.length
+                  ? carColors[carsHere[0][0]] || "bg-gray-400"
+                  : "bg-gray-100";
 
-            return (
-              <div
-                key={`${row}-${col}`}
-                className={`w-6 h-6 flex items-center justify-center text-xs ${bgColor} border border-white`}
-                title={carsHere.map(c => c[0]).join(", ") || ""}
-              >
-                {collisionsHere.length ? <MapPin size={12} /> : carsHere.map(c => c[0]).join("")}
-              </div>
-            );
-          })
+              return (
+                <div
+                  key={`${row}-${col}`}
+                  className={`w-full h-full flex items-center justify-center text-xs ${bgColor} border border-white`}
+                  title={carsHere.map(c => c[0]).join(", ") || ""}
+                >
+                  {collisionsHere.length
+                    ? <MapPin size={12} />
+                    : carsHere.length ? getDirectionIcon(carsHere[0][1]?.history[step]?.[2]) : null}
+                </div>
+              );
+            })
+          ))}
+        </div>
+      </div>
+      <div className="mt-4 flex flex-wrap gap-2 text-sm">
+        {Object.keys(cars).map((id) => (
+          <div key={id} className="flex items-center gap-2">
+            <span className={`w-4 h-4 inline-block rounded ${carColors[id]}`}></span>
+            <span>{id}</span>
+          </div>
         ))}
       </div>
     </Card>
@@ -107,7 +144,34 @@ export default function SimulationDashboard() {
   }, [playing, data, selectedAdapter]);
 
   return (
-    <div className="p-6 bg-gray-50 min-h-screen space-y-6 font-sans">
+    <div className="p-4 sm:p-6 bg-gray-50 min-h-screen space-y-6 font-sans max-w-screen-xl mx-auto">
+      <div className="text-center space-y-2 px-2">
+        <h1 className="text-2xl sm:text-3xl font-bold text-gray-800">Auto Car Collision Simulator</h1>
+        <p className="text-gray-600 max-w-2xl mx-auto">
+          Visualize multiple car paths on a shared grid and detect collisions using different spatial indexing adapters.
+        </p>
+        <div className="bg-blue-50 text-blue-800 p-4 rounded-lg border border-blue-200 max-w-2xl mx-auto text-left text-sm">
+          <h2 className="font-semibold mb-1">Instructions:</h2>
+          <ul className="list-disc list-inside space-y-1">
+            <li>Input format: Grid size followed by each car's name, start position/direction, and commands.</li>
+            <li>Example:
+              <pre className="bg-white text-gray-800 p-2 mt-1 rounded border border-gray-300 overflow-auto">
+10 10
+
+A
+1 2 N
+FFRFFFFRRL
+
+B
+7 8 W
+FFLFFFFFFF
+              </pre>
+            </li>
+            <li>Click <strong>Simulate</strong> to start, then <strong>Play/Pause</strong> to animate the steps.</li>
+          </ul>
+        </div>
+      </div>
+
       <textarea
         value={inputText}
         onChange={(e) => setInputText(e.target.value)}

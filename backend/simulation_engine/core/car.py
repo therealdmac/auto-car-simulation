@@ -5,7 +5,7 @@ class Car:
     def __init__(self, name, position):
         self.name = name
         self.x, self.y, self.d = position
-        self.history = [(self.x, self.y)]
+        self.history = []
 
     def command(self, c, width, height):
         if c == 'L':
@@ -17,4 +17,3 @@ class Car:
             nx, ny = self.x + dx, self.y + dy
             if 0 <= nx < width and 0 <= ny < height:
                 self.x, self.y = nx, ny
-        self.history.append((self.x, self.y))

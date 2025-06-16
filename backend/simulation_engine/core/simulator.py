@@ -12,6 +12,7 @@ def simulate(field, cars, adapter_cls):
 
     for cid, car in car_objs.items():
         adapter.insert(cid, car.x, car.y)
+        car.history.append((car.x, car.y, car.d))  # include direction in initial state
 
     for step in range(max(len(c) for c in commands.values())):
         positions_this_step = {}
@@ -20,15 +21,22 @@ def simulate(field, cars, adapter_cls):
             if step < len(commands[cid]):
                 car.command(commands[cid][step], width, height)
             adapter.move(cid, car.x, car.y)
+            car.history.append((car.x, car.y, car.d))  # append (x, y, d)
             key = (car.x, car.y)
             positions_this_step.setdefault(key, []).append(cid)
 
         for (x, y), ids in positions_this_step.items():
             if len(ids) > 1:
                 collisions.append((*ids[:2], x, y, step + 1))
+
     return {
         "collisions": collisions,
-        "cars": {cid: {"history": car.history, "final": (car.x, car.y, car.d)} for cid, car in car_objs.items()}
+        "cars": {
+            cid: {
+                "history": car.history,
+                "final": (car.x, car.y, car.d)
+            } for cid, car in car_objs.items()
+        }
     }
 
 def run_all_adapters(field, cars):
