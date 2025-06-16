@@ -1,6 +1,8 @@
 from fastapi import FastAPI
 from pydantic import BaseModel
 from fastapi.middleware.cors import CORSMiddleware
+
+from simulation_engine.config import settings
 from simulation_engine.core.logger import get_logger
 from simulation_engine.core.parser import parse_text_input
 from simulation_engine.core.simulator import run_all_adapters
@@ -15,7 +17,7 @@ app = FastAPI(
 
 app.add_middleware(
     CORSMiddleware,
-    allow_origins=["*"],
+    allow_origins=settings.allowed_origins,
     allow_credentials=True,
     allow_methods=["*"],
     allow_headers=["*"],
