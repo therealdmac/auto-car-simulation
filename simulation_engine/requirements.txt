@@ -1,0 +1,5 @@
+fastapi
+uvicorn
+pyqtree
+pydantic
+pytest
